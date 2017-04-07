@@ -1,5 +1,5 @@
-cp history.py lambda_deploy/
+cp spotifyhistorymonitor.py lambda_deploy/
 pushd lambda_deploy
-zip -r ../history.zip . 
+zip -r ../lambda_deploy.zip . 
 popd
-aws lambda update-function-code --function-name history_monitor --zip-file fileb://history.zip 
+aws lambda update-function-code --function-name history_monitor --zip-file fileb://lambda_deploy.zip 

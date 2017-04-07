@@ -14,11 +14,12 @@ class SpotifyHistoryMonitor(object):
     """ """
 
 
-    def __init__(self):
+    def __init__(self, username):
         self._dynamodb = boto3.resource('dynamodb')
         self._load_configuration()
         self._spotify = Spotify(auth=self._access_token)
         self._plays = None
+        self._username = username
 
 
     def _load_configuration(self):
@@ -84,7 +85,7 @@ class SpotifyHistoryMonitor(object):
 
     def save_new_plays(self):
         spotify_plays = self._dynamodb.Table('spotify_plays')
-        response = spotify_plays.query(KeyConditionExpression=Key('user').eq('andrewslotnick'),
+        response = spotify_plays.query(KeyConditionExpression=Key('user').eq(self._username),
                                        ProjectionExpression='played_at',
                                        ScanIndexForward=False, #reverse order
                                        Limit=1)
@@ -104,15 +105,17 @@ class SpotifyHistoryMonitor(object):
 
 
 def main():
-    spotify_history = SpotifyHistoryMonitor()
+    spotify_history = SpotifyHistoryMonitor('andrewslotnick')
     num_written = spotify_history.save_new_plays()
     print(num_written)
 
 
 def lambda_handler(event, context):
-    spotify_history = SpotifyHistoryMonitor()
+    spotify_history = SpotifyHistoryMonitor('andrewslotnick')
     num_written = spotify_history.save_new_plays()
-    return {'num_written': num_written}
+    result = {'num_written': num_written}
+    print(result)
+    return result
 
 
 def authenticate_manually():
