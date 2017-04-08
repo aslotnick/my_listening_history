@@ -54,6 +54,7 @@ class SpotifyHistoryMonitor(object):
         self._refresh_token = tokens['refresh_token']
         self._spotify = Spotify(auth=self._access_token)
         self._save_configuration()
+        print('renewed tokens')
 
 
     def _retrieve_plays(self):
@@ -97,33 +98,27 @@ class SpotifyHistoryMonitor(object):
 
         with spotify_plays.batch_writer() as writer:
             for play in plays_to_write:
-                play_with_key = {'user':'andrewslotnick'}
+                play_with_key = {'user':self._username}
                 play_with_key.update(play)
                 writer.put_item(play_with_key)
 
         return len(plays_to_write)
 
 
-def main():
-    spotify_history = SpotifyHistoryMonitor('andrewslotnick')
+def main(username):
+    spotify_history = SpotifyHistoryMonitor(username)
     num_written = spotify_history.save_new_plays()
     print(num_written)
 
 
 def lambda_handler(event, context):
-    spotify_history = SpotifyHistoryMonitor('andrewslotnick')
+    spotify_history = SpotifyHistoryMonitor(event['username'])
     num_written = spotify_history.save_new_plays()
-    result = {'num_written': num_written}
+    result = {'plays_written': num_written}
     print(result)
     return result
 
 
-def authenticate_manually():
-    from spotipy.util import prompt_for_user_token
-    tokens = prompt_for_user_token(username, RECENTLY_PLAYED_SCOPE, 
-                                   redirect_uri='http://andrewslotnick.com')
-    print(tokens)
-
-
 if __name__ == '__main__':
-    main()
+    import sys
+    main(sys.argv[1])

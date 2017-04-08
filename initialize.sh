@@ -15,7 +15,7 @@ aws lambda create-function \
     --function-name spotify_history_monitor \
     --runtime python2.7 \
     --role arn:aws:iam::$AWS_ACCOUNT_ID:role/service-role/history_monitor_lambda_role \
-    --handler history.lambda_handler \
+    --handler spotifyhistorymonitor.lambda_handler \
     --zip-file fileb://lambda_deploy.zip \
     --memory-size 128 \
     --timeout 60
